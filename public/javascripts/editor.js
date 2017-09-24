@@ -62,6 +62,7 @@ function afterEditorLoad(key) {
   editor.$blockScrolling = Infinity;
   sync(key);
   checkSystem();
+  setupImagePaste(editor);
 };
 
 function sync(key) {
@@ -131,11 +132,12 @@ function sync(key) {
   });
 };
 
-function insertImage() {
-  var fileInput = $('#file_input')[0].files[0];
+function insertImage(n, f) {
+  var name = n || "file";
+  var fileInput = f || $('#file_input')[0].files[0];
   if (fileInput) {
     var formData = new FormData();
-    formData.append('file', fileInput);
+    formData.append(n, fileInput);
     $('#upload-image-btn').prop("disabled", true);
     $.ajax({
       type: "POST",
@@ -279,4 +281,20 @@ function getArticle() {
   var article = {'title': title, 'date': date, 'tags': tags,
                  'categories': categories, 'content': content, 'key': key};
   return article;
+}
+
+function setupImagePaste(editor) {
+  document.addEventListener('paste', function (e) {
+    if (e.clipboardData) {
+      var items = e.clipboardData.items;
+      if (!items) return;
+
+      for (var i = 0; i < items.length; i++) {
+        if (items[i].type.indexOf("image") !== -1) {
+          insertImage('paste', items[i].getAsFile())
+        }
+      }
+      e.preventDefault();
+    }
+  }, false);
 }

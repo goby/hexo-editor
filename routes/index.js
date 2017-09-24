@@ -33,7 +33,7 @@ router.get('/post', (req, res, next) => {
 router.get('/cache', (req, res, next) => {
   const cachedArticleId = cache_name + req.query.id;
   cache.get(cachedArticleId, (cachedArticle) => {
-    if (!cachedArticle) {
+    if (!cachedArticle || true) {
       cache.get(req.query.id, (article) => {
         res.send(article);
       })

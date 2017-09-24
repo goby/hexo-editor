@@ -6,6 +6,7 @@ const fs = require('fs');
 const config = yaml.safeLoad(fs.readFileSync('./_config.yml', 'utf8'));
 const Manager = require('../models/file-manager');
 const cache = require('../models/cache');
+const util = require('../models/util');
 const busboy = require('connect-busboy');
 
 const manager = new Manager(config.base_dir);
@@ -27,6 +28,9 @@ router.post('/image', (req, res, next) => {
   let fstream;
   req.pipe(req.busboy);
   req.busboy.on('file', (fieldname, file, filename) => {
+    if (fieldname === 'paste') {
+      filename = 'image-' + util.formatDateStr(new Date(), 'yyyymmdd-HHMMss') + filename.substring(filename.lastIndexOf('.'));
+    }
     fstream = fs.createWriteStream(config.base_dir + '/source/images/' + filename);
     file.pipe(fstream);
     fstream.on('close', () => {
